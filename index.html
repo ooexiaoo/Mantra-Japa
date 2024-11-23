@@ -458,6 +458,13 @@
   </div>
   
   <script>
+    function onSignIn(googleUser) {
+      // Existing login logic...
+      
+      // Redirect user after successful login
+      window.location.href = "/home";
+    }
+
   let currentUser = null;
   
   function onSignIn(googleUser) {
@@ -673,7 +680,7 @@
       image: 'https://cdn.pixabay.com/photo/2018/05/09/12/30/love-3385680_1280.jpg'
     }
   };
-  
+
   // Merge with existing mantraData
   Object.assign(mantraData, additionalMantras);
   
