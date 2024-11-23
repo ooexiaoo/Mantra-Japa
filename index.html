@@ -1,1009 +1,1019 @@
 <html><head><base href="." />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Japa Meditation Counter</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <meta name="google-signin-client_id" content="771363056084-2o72bubv5n8f4ggame9ht91tf58r7akj.apps.googleusercontent.com">
-    <style>
-    :root {
-      --primary: #ff7043;
-      --secondary: #ffa270;
-      --bg: #fff3e0;
-      --text: #37474f;
-    }
-    
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: var(--bg);
-      color: var(--text);
-    }
-    
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    
-    .nav-tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    
-    .nav-tab {
-      background: white;
-      padding: 10px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      border: 2px solid var(--primary);
-      color: var(--primary);
-    }
-    
-    .nav-tab.active {
-      background: var(--primary);
-      color: white;
-    }
-    
-    .tab-content {
-      display: none;
-    }
-    
-    .tab-content.active {
-      display: block;
-    }
-    
-    .mantra-category {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    .mantra-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
-    }
-    
-    .mantra-card {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 15px;
-      align-items: center;
-      background: var(--bg);
-      padding: 15px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    
-    .mantra-card:hover {
-      transform: translateY(-2px);
-    }
-    
-    .deity-image {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 50%;
-      border: 2px solid var(--primary);
-    }
-    
-    .mantra-text {
-      flex: 1;
-    }
-    
-    .sanskrit-text {
-      font-family: 'Sanskrit Text', Arial;
-      color: var(--primary);
-      font-size: 1.1em;
-      margin: 5px 0;
-    }
-    
-    .counter-section {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-    
-    .mantra-info {
-      background: var(--bg);
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-    
-    .mala-circle {
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      border: 4px solid var(--primary);
-      margin: 20px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    
-    .mala-circle:active {
-      transform: scale(0.95);
-    }
-    
-    .count {
-      font-size: 2.5em;
-      color: var(--primary);
-    }
-    
-    button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 1em;
-      margin: 5px;
-      transition: background 0.3s;
-    }
-    
-    button:hover {
-      background: var(--secondary);
-    }
-    
-    input {
-      padding: 10px;
-      border: 2px solid var(--primary);
-      border-radius: 25px;
-      margin: 5px;
-      width: 100px;
-    }
-    
-    .stats-section {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    .chart-container {
-      margin-top: 20px;
-      height: 300px;
-    }
-    
-    .success-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    
-    .success-content {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      text-align: center;
-      animation: fadeIn 0.5s ease-out;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .success-content h2 {
-      color: var(--primary);
-      margin-bottom: 20px;
-    }
-    
-    .mantra-categories-nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    
-    .category-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-    }
-    
-    .category-btn.active {
-      background: var(--secondary);
-    }
-    
-    .login-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--bg);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-    }
-    
-    .login-box {
-      background: white;
-      padding: 40px;
-      border-radius: 15px;
-      text-align: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      max-width: 400px;
-      width: 90%;
-    }
-    
-    .login-box h2 {
-      color: var(--primary);
-      margin-bottom: 20px;
-    }
-    
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      position: absolute;
-      top: 20px;
-      right: 20px;
-    }
-    
-    .user-info img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-    }
-    
-    .logout-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-    }
-    </style>
-    </head>
-    <body>
-    <div id="loginContainer" class="login-container">
-      <div class="login-box">
-        <h2>Welcome to Japa Meditation Counter</h2>
-        <p>Please sign in to continue</p>
-        <div class="g-signin2" data-onsuccess="onSignIn"></div>
-      </div>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Japa Meditation Counter</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <meta name="google-signin-client_id" content="771363056084-2o72bubv5n8f4ggame9ht91tf58r7akj.apps.googleusercontent.com">
+  <style>
+  :root {
+    --primary: #ff7043;
+    --secondary: #ffa270;
+    --bg: #fff3e0;
+    --text: #37474f;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: var(--bg);
+    color: var(--text);
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .nav-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .nav-tab {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+  }
+  
+  .nav-tab.active {
+    background: var(--primary);
+    color: white;
+  }
+  
+  .tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+  
+  .mantra-category {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  
+  .mantra-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+  }
+  
+  .mantra-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 15px;
+    align-items: center;
+    background: var(--bg);
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .mantra-card:hover {
+    transform: translateY(-2px);
+  }
+  
+  .deity-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+  }
+  
+  .mantra-text {
+    flex: 1;
+  }
+  
+  .sanskrit-text {
+    font-family: 'Sanskrit Text', Arial;
+    color: var(--primary);
+    font-size: 1.1em;
+    margin: 5px 0;
+  }
+  
+  .counter-section {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+  }
+  
+  .mantra-info {
+    background: var(--bg);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .mala-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 4px solid var(--primary);
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .mala-circle:active {
+    transform: scale(0.95);
+  }
+  
+  .count {
+    font-size: 2.5em;
+    color: var(--primary);
+  }
+  
+  button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1em;
+    margin: 5px;
+    transition: background 0.3s;
+  }
+  
+  button:hover {
+    background: var(--secondary);
+  }
+  
+  input {
+    padding: 10px;
+    border: 2px solid var(--primary);
+    border-radius: 25px;
+    margin: 5px;
+    width: 100px;
+  }
+  
+  .stats-section {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  
+  .chart-container {
+    margin-top: 20px;
+    height: 300px;
+  }
+  
+  .success-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .success-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .success-content h2 {
+    color: var(--primary);
+    margin-bottom: 20px;
+  }
+  
+  .mantra-categories-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .category-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+  }
+  
+  .category-btn.active {
+    background: var(--secondary);
+  }
+  
+  .login-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+  }
+  
+  .login-box {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    max-width: 400px;
+    width: 90%;
+  }
+  
+  .login-box h2 {
+    color: var(--primary);
+    margin-bottom: 20px;
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+  
+  .user-info img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+  }
+  
+  .logout-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  </style>
+  </head>
+  <body>
+  <div id="loginContainer" class="login-container">
+    <div class="login-box">
+      <h2>Welcome to Japa Meditation Counter</h2>
+      <p>Please sign in to continue</p>
+      <div class="g-signin2" data-onsuccess="onSignIn"></div>
     </div>
-    
-    <div id="userInfo" class="user-info" style="display: none;">
-      <img id="userImage" alt="User profile picture">
-      <span id="userName"></span>
-      <button onclick="signOut()" class="logout-btn">Sign Out</button>
+  </div>
+  
+  <div id="userInfo" class="user-info" style="display: none;">
+    <img id="userImage" alt="User profile picture">
+    <span id="userName"></span>
+    <button onclick="signOut()" class="logout-btn">Sign Out</button>
+  </div>
+  
+  <div class="container">
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showTab('home')">Home</button>
+      <button class="nav-tab" onclick="showTab('allMantras')">All Mantras</button>
+      <button class="nav-tab" onclick="showTab('counter')">Counter</button>
+      <button class="nav-tab" onclick="showTab('stats')">Statistics</button>
     </div>
-    
-    <div class="container">
-      <div class="nav-tabs">
-        <button class="nav-tab active" onclick="showTab('home')">Home</button>
-        <button class="nav-tab" onclick="showTab('allMantras')">All Mantras</button>
-        <button class="nav-tab" onclick="showTab('counter')">Counter</button>
-        <button class="nav-tab" onclick="showTab('stats')">Statistics</button>
-      </div>
-    
-      <div id="homeTab" class="tab-content active">
-        <div class="mantra-category">
-          <h2>Success Mantras</h2>
-          <div class="mantra-list">
-            <div class="mantra-card" onclick="selectMantra('om_aim_hreem_kleem', 'Success')">
-              <img src="https://cdn.pixabay.com/photo/2017/08/25/10/57/goddess-saraswati-2679629_1280.jpg" 
-                   alt="Image of Goddess Saraswati, Lord Vishnu, and Goddess Lakshmi" 
-                   class="deity-image"
-                   width="80" height="80">
-              <div class="mantra-text">
-                <h3>Om Aim Hreem Kleem</h3>
-                <div class="sanskrit-text">ॐ ऐं ह्रीं क्लीं</div>
-                <p>For success in all endeavors</p>
-              </div>
-            </div>
-            <div class="mantra-card" onclick="selectMantra('om_gam_ganapataye_namaha', 'Success')">
-              <img src="https://cdn.pixabay.com/photo/2016/08/01/09/37/ganesha-1561197_1280.jpg" 
-                   alt="Image of Lord Ganesha" 
-                   class="deity-image"
-                   width="80" height="80">
-              <div class="mantra-text">
-                <h3>Om Gam Ganapataye Namaha</h3>
-                <div class="sanskrit-text">ॐ गं गणपतये नमः</div>
-                <p>Ganesh mantra for removing obstacles</p>
-              </div>
-            </div>
-          </div>
-        </div>
-    
-        <div class="mantra-category">
-          <h2>Wealth Mantras</h2>
-          <div class="mantra-list">
-            <div class="mantra-card" onclick="selectMantra('om_shreem_mahalakshmiyei_namaha', 'Wealth')">
-              <img src="https://cdn.pixabay.com/photo/2017/07/24/19/57/lakshmi-2535647_1280.jpg" 
-                   alt="Image of Goddess Lakshmi" 
-                   class="deity-image"
-                   width="80" height="80">
-              <div class="mantra-text">
-                <h3>Om Shreem Mahalakshmiyei Namaha</h3>
-                <div class="sanskrit-text">ॐ श्रीं महालक्ष्म्यै नमः</div>
-                <p>For abundance and prosperity</p>
-              </div>
-            </div>
-            <div class="mantra-card" onclick="selectMantra('om_namo_kubeeraya_namaha', 'Wealth')">
-              <img src="https://cdn.pixabay.com/photo/2020/07/06/01/33/kubera-5375856_1280.jpg" 
-                   alt="Image of Lord Kubera" 
-                   class="deity-image"
-                   width="80" height="80">
-              <div class="mantra-text">
-                <h3>Om Namo Kubeeraya Namaha</h3>
-                <div class="sanskrit-text">ॐ नमो कुबेराय नमः</div>
-                <p>For material wealth and success</p>
-              </div>
-            </div>
-          </div>
-        </div>
-    
-        <div class="mantra-category">
-          <h2>Peace & Happiness</h2>
-          <div class="mantra-list">
-            <div class="mantra-card" onclick="selectMantra('om_shanti_shanti_shanti', 'Peace')">
-              <img src="https://cdn.pixabay.com/photo/2016/08/25/19/10/buddha-1620503_1280.jpg" 
-                   alt="Image representing universal peace" 
-                   class="deity-image"
-                   width="80" height="80">
-              <div class="mantra-text">
-                <h3>Om Shanti Shanti Shanti</h3>
-                <div class="sanskrit-text">ॐ शान्तिः शान्तिः शान्तिः</div>
-                <p>For inner peace and tranquility</p>
-              </div>
-            </div>
-            <div class="mantra-card" onclick="selectMantra('om_namah_shivaya', 'Peace')">
-              <img src="https://cdn.pixabay.com/photo/2018/06/26/13/32/lord-shiva-3499638_1280.jpg" 
-                   alt="Image of Lord Shiva" 
-                   class="deity-image"
-                   width="80" height="80">
-              <div class="mantra-text">
-                <h3>Om Namah Shivaya</h3>
-                <div class="sanskrit-text">ॐ नमः शिवाय</div>
-                <p>Universal peace and transformation</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    
-      <div id="allMantrasTab" class="tab-content">
-        <div class="mantra-categories-nav">
-          <button class="category-btn" onclick="filterMantrasByCategory('Success')">Success</button>
-          <button class="category-btn" onclick="filterMantrasByCategory('Wealth')">Wealth</button>
-          <button class="category-btn" onclick="filterMantrasByCategory('Peace')">Peace</button>
-          <button class="category-btn" onclick="filterMantrasByCategory('Protection')">Protection</button>
-          <button class="category-btn" onclick="filterMantrasByCategory('Healing')">Healing</button>
-          <button class="category-btn" onclick="filterMantrasByCategory('Wisdom')">Wisdom</button>
-          <button class="category-btn" onclick="filterMantrasByCategory('Love')">Love</button>
-        </div>
-        
-        <div class="mantra-list" id="mantraList">
-          <!-- Mantras will be populated here by JavaScript -->
-        </div>
-      </div>
-    
-      <div id="counterTab" class="tab-content">
-        <div class="mantra-info" id="selectedMantraInfo">
-          <h2 id="currentMantra">Select a mantra to begin</h2>
-          <p id="mantraDescription"></p>
-        </div>
-        
-        <div class="counter-section">
-          <div>
-            <label>Daily Goal:</label>
-            <input type="number" id="goal" min="1" value="108">
-            <button onclick="setGoal()">Set Goal</button>
-          </div>
-          
-          <div class="mala-circle" onclick="addOne()">
-            <div class="count">
-              <span id="counter">0</span>
-              <span id="goal-display"></span>
-            </div>
-          </div>
-          
-          <div>
-            <button onclick="addCustom()">Add Custom</button>
-            <button onclick="resetCount()">Reset</button>
-          </div>
-        </div>
-      </div>
-    
-      <div id="statsTab" class="tab-content">
-        <div class="stats-section">
-          <h2>Statistics</h2>
-          <div class="tab-buttons">
-            <button onclick="showStats('daily')">Daily</button>
-            <button onclick="showStats('weekly')">Weekly</button>
-            <button onclick="showStats('monthly')">Monthly</button>
-          </div>
-          <div class="chart-container">
-            <canvas id="statsChart"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="success-modal" id="successModal">
-      <div class="success-content">
-        <h2>🎉 Congratulations! 🎉</h2>
-        <p>You've completed your daily japa goal!</p>
-        <p>May this practice bring you peace and enlightenment.</p>
-        <button onclick="closeSuccessModal()">Continue</button>
-      </div>
-    </div>
-    
-    <script>
-    let currentUser = null;
-    
-    function onSignIn(googleUser) {
-      currentUser = googleUser;
-      const profile = googleUser.getBasicProfile();
-      
-      // Display user info
-      document.getElementById('userImage').src = profile.getImageUrl();
-      document.getElementById('userName').textContent = profile.getName();
-      document.getElementById('userInfo').style.display = 'flex';
-      
-      // Hide login container
-      document.getElementById('loginContainer').style.display = 'none';
-      
-      // Load user's data
-      loadUserData(profile.getId());
-    }
-    
-    function signOut() {
-      const auth2 = gapi.auth2.getAuthInstance();
-      auth2.signOut().then(() => {
-        // Hide user info
-        document.getElementById('userInfo').style.display = 'none';
-        
-        // Show login container
-        document.getElementById('loginContainer').style.display = 'flex';
-        
-        // Reset current user
-        currentUser = null;
-        
-        // Clear local data
-        resetUserData();
-      });
-    }
-    
-    function loadUserData(userId) {
-      // Modify storage keys to be user-specific
-      const userPrefix = `user_${userId}_`;
-      
-      // Load japa state
-      const savedState = localStorage.getItem(userPrefix + 'currentJapaState');
-      if (savedState) {
-        const state = JSON.parse(savedState);
-        currentCount = state.count || 0;
-        currentMantra = state.mantra || '';
-        currentCategory = state.category || '';
-        dailyGoal = state.goal || 108;
-        updateDisplay();
-      }
-      
-      // Load stats
-      const savedStats = localStorage.getItem(userPrefix + 'japaData');
-      if (savedStats) {
-        localStorage.setItem('japaData', savedStats);
-        showStats('daily');
-      }
-    }
-    
-    function resetUserData() {
-      // Clear all user-specific data
-      currentCount = 0;
-      currentMantra = '';
-      currentCategory = '';
-      dailyGoal = 108;
-      updateDisplay();
-      localStorage.setItem('japaData', '[]');
-      showStats('daily');
-    }
-    
-    // Modify autoSaveState and autoSaveToStats to be user-specific
-    function autoSaveState() {
-      if (!currentUser) return;
-      
-      const userId = currentUser.getBasicProfile().getId();
-      const userPrefix = `user_${userId}_`;
-      
-      const state = {
-        count: currentCount,
-        mantra: currentMantra,
-        category: currentCategory,
-        goal: dailyGoal
-      };
-      localStorage.setItem(userPrefix + 'currentJapaState', JSON.stringify(state));
-    }
-    
-    function autoSaveToStats() {
-      if (!currentUser || !currentMantra) return;
-      
-      const userId = currentUser.getBasicProfile().getId();
-      const userPrefix = `user_${userId}_`;
-      
-      const data = JSON.parse(localStorage.getItem('japaData') || '[]');
-      
-      const now = new Date();
-      now.setHours(0, 0, 0, 0); // Normalize to start of day
-      
-      // Get today's total count
-      let todayTotal = currentCount;
-      
-      // Find if there are any previous entries for today
-      const todayEntries = data.filter(entry => {
-        const entryDate = new Date(entry.date);
-        entryDate.setHours(0, 0, 0, 0);
-        return entryDate.getTime() === now.getTime();
-      });
-      
-      // Remove today's entries
-      const filteredData = data.filter(entry => {
-        const entryDate = new Date(entry.date);
-        entryDate.setHours(0, 0, 0, 0);
-        return entryDate.getTime() !== now.getTime();
-      });
-      
-      // Add new entry with current count
-      filteredData.push({
-        date: now.toISOString(),
-        count: todayTotal,
-        mantra: currentMantra,
-        category: currentCategory,
-        timestamp: now.getTime()
-      });
-      
-      // Sort by date
-      filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
-      
-      // Save with user prefix
-      localStorage.setItem(userPrefix + 'japaData', JSON.stringify(filteredData));
-      localStorage.setItem('japaData', JSON.stringify(filteredData)); // For current session
-    }
-    
-    // Remaining JavaScript functions...
-    let currentCount = 0;
-    let dailyGoal = 108;
-    let statsChart = null;
-    let currentMantra = '';
-    let currentCategory = '';
-    
-    const mantraData = {
-      'om_aim_hreem_kleem': {
-        name: 'Om Aim Hreem Kleem',
-        description: 'A powerful mantra for success and achievement. Associated with Goddess Saraswati, Lord Vishnu, and Goddess Lakshmi respectively. This combination brings knowledge, abundance, and attraction of positive outcomes.',
-        deity: 'Multiple Deities'
-      },
-      'om_gam_ganapataye_namaha': {
-        name: 'Om Gam Ganapataye Namaha',
-        description: 'The most fundamental Ganesh mantra for removing obstacles and ensuring success in new beginnings. Lord Ganesha is the remover of obstacles and patron of arts and sciences.',
-        deity: 'Lord Ganesha'
-      },
-      'om_shreem_mahalakshmiyei_namaha': {
-        name: 'Om Shreem Mahalakshmiyei Namaha',
-        description: 'A powerful mantra for invoking the blessings of Goddess Lakshmi. This mantra helps attract abundance, prosperity, and material well-being.',
-        deity: 'Goddess Lakshmi'
-      },
-      'om_namo_kubeeraya_namaha': {
-        name: 'Om Namo Kubeeraya Namaha',
-        description: 'A mantra dedicated to Lord Kuber, the divine treasurer. This mantra helps in attracting wealth and material success.',
-        deity: 'Lord Kuber'
-      },
-      'om_shanti_shanti_shanti': {
-        name: 'Om Shanti Shanti Shanti',
-        description: 'A universal peace mantra that brings harmony at the physical, mental, and spiritual levels. This mantra helps establish deep inner peace.',
-        deity: 'Universal'
-      },
-      'om_namah_shivaya': {
-        name: 'Om Namah Shivaya',
-        description: 'One of the most powerful and ancient Sanskrit mantras, dedicated to Lord Shiva. This mantra promotes transformation, peace, and spiritual growth.',
-        deity: 'Lord Shiva'
-      }
-    };
-    
-    // Additional mantras
-    const additionalMantras = {
-      'om_durgayei_namaha': {
-        name: 'Om Durgayei Namaha',
-        description: 'A powerful protective mantra dedicated to Goddess Durga. Provides protection from negative energies and enemies.',
-        deity: 'Goddess Durga',
-        sanskrit: 'ॐ दुर्गायै नमः',
-        category: 'Protection',
-        image: 'https://cdn.pixabay.com/photo/2017/10/17/18/27/goddess-durga-2861148_1280.jpg'
-      },
-      'om_arogya_vardhiniyei_namaha': {
-        name: 'Om Arogya Vardhiniyei Namaha',
-        description: 'A healing mantra for physical and mental well-being.',
-        deity: 'Dhanvantari',
-        sanskrit: 'ॐ आरोग्य वर्धिनीयै नमः',
-        category: 'Healing',
-        image: 'https://cdn.pixabay.com/photo/2016/11/28/21/20/healthcare-1866115_1280.jpg'
-      },
-      'om_vagishwariyei_namaha': {
-        name: 'Om Vagishwariyei Namaha',
-        description: 'For gaining knowledge, wisdom and mastery over speech.',
-        deity: 'Goddess Saraswati',
-        sanskrit: 'ॐ वागीश्वर्यै नमः',
-        category: 'Wisdom',
-        image: 'https://cdn.pixabay.com/photo/2017/08/25/10/57/goddess-saraswati-2679629_1280.jpg'
-      },
-      'om_kamadevaya_namaha': {
-        name: 'Om Kamadevaya Namaha',
-        description: 'For harmony in relationships and attracting love.',
-        deity: 'Kamadeva',
-        sanskrit: 'ॐ कामदेवाय नमः',
-        category: 'Love',
-        image: 'https://cdn.pixabay.com/photo/2018/05/09/12/30/love-3385680_1280.jpg'
-      }
-    };
-    
-    // Merge with existing mantraData
-    Object.assign(mantraData, additionalMantras);
-    
-    // Add function to filter mantras by category
-    function filterMantrasByCategory(category) {
-      const mantras = Object.entries(mantraData)
-        .filter(([key, data]) => data.category === category)
-        .map(([key, data]) => ({key, ...data}));
-        
-      let html = '';
-      for (const mantra of mantras) {
-        html += `
-          <div class="mantra-card" onclick="selectMantra('${mantra.key}', '${mantra.category}')">
-            <img src="${mantra.image}" 
-                 alt="Image of ${mantra.deity}" 
+  
+    <div id="homeTab" class="tab-content active">
+      <div class="mantra-category">
+        <h2>Success Mantras</h2>
+        <div class="mantra-list">
+          <div class="mantra-card" onclick="selectMantra('om_aim_hreem_kleem', 'Success')">
+            <img src="https://cdn.pixabay.com/photo/2017/08/25/10/57/goddess-saraswati-2679629_1280.jpg" 
+                 alt="Image of Goddess Saraswati, Lord Vishnu, and Goddess Lakshmi" 
                  class="deity-image"
                  width="80" height="80">
             <div class="mantra-text">
-              <h3>${mantra.name}</h3>
-              <div class="sanskrit-text">${mantra.sanskrit}</div>
-              <p>${mantra.description}</p>
+              <h3>Om Aim Hreem Kleem</h3>
+              <div class="sanskrit-text">ॐ ऐं ह्रीं क्लीं</div>
+              <p>For success in all endeavors</p>
             </div>
           </div>
-        `;
-      }
+          <div class="mantra-card" onclick="selectMantra('om_gam_ganapataye_namaha', 'Success')">
+            <img src="https://cdn.pixabay.com/photo/2016/08/01/09/37/ganesha-1561197_1280.jpg" 
+                 alt="Image of Lord Ganesha" 
+                 class="deity-image"
+                 width="80" height="80">
+            <div class="mantra-text">
+              <h3>Om Gam Ganapataye Namaha</h3>
+              <div class="sanskrit-text">ॐ गं गणपतये नमः</div>
+              <p>Ganesh mantra for removing obstacles</p>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="mantra-category">
+        <h2>Wealth Mantras</h2>
+        <div class="mantra-list">
+          <div class="mantra-card" onclick="selectMantra('om_shreem_mahalakshmiyei_namaha', 'Wealth')">
+            <img src="https://cdn.pixabay.com/photo/2017/07/24/19/57/lakshmi-2535647_1280.jpg" 
+                 alt="Image of Goddess Lakshmi" 
+                 class="deity-image"
+                 width="80" height="80">
+            <div class="mantra-text">
+              <h3>Om Shreem Mahalakshmiyei Namaha</h3>
+              <div class="sanskrit-text">ॐ श्रीं महालक्ष्म्यै नमः</div>
+              <p>For abundance and prosperity</p>
+            </div>
+          </div>
+          <div class="mantra-card" onclick="selectMantra('om_namo_kubeeraya_namaha', 'Wealth')">
+            <img src="https://cdn.pixabay.com/photo/2020/07/06/01/33/kubera-5375856_1280.jpg" 
+                 alt="Image of Lord Kubera" 
+                 class="deity-image"
+                 width="80" height="80">
+            <div class="mantra-text">
+              <h3>Om Namo Kubeeraya Namaha</h3>
+              <div class="sanskrit-text">ॐ नमो कुबेराय नमः</div>
+              <p>For material wealth and success</p>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="mantra-category">
+        <h2>Peace & Happiness</h2>
+        <div class="mantra-list">
+          <div class="mantra-card" onclick="selectMantra('om_shanti_shanti_shanti', 'Peace')">
+            <img src="https://cdn.pixabay.com/photo/2016/08/25/19/10/buddha-1620503_1280.jpg" 
+                 alt="Image representing universal peace" 
+                 class="deity-image"
+                 width="80" height="80">
+            <div class="mantra-text">
+              <h3>Om Shanti Shanti Shanti</h3>
+              <div class="sanskrit-text">ॐ शान्तिः शान्तिः शान्तिः</div>
+              <p>For inner peace and tranquility</p>
+            </div>
+          </div>
+          <div class="mantra-card" onclick="selectMantra('om_namah_shivaya', 'Peace')">
+            <img src="https://cdn.pixabay.com/photo/2018/06/26/13/32/lord-shiva-3499638_1280.jpg" 
+                 alt="Image of Lord Shiva" 
+                 class="deity-image"
+                 width="80" height="80">
+            <div class="mantra-text">
+              <h3>Om Namah Shivaya</h3>
+              <div class="sanskrit-text">ॐ नमः शिवाय</div>
+              <p>Universal peace and transformation</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div id="allMantrasTab" class="tab-content">
+      <div class="mantra-categories-nav">
+        <button class="category-btn" onclick="filterMantrasByCategory('Success')">Success</button>
+        <button class="category-btn" onclick="filterMantrasByCategory('Wealth')">Wealth</button>
+        <button class="category-btn" onclick="filterMantrasByCategory('Peace')">Peace</button>
+        <button class="category-btn" onclick="filterMantrasByCategory('Protection')">Protection</button>
+        <button class="category-btn" onclick="filterMantrasByCategory('Healing')">Healing</button>
+        <button class="category-btn" onclick="filterMantrasByCategory('Wisdom')">Wisdom</button>
+        <button class="category-btn" onclick="filterMantrasByCategory('Love')">Love</button>
+      </div>
       
-      document.getElementById('mantraList').innerHTML = html;
-    }
-    
-    function showStats(period) {
-      if (statsChart) {
-        statsChart.destroy();
-      }
-    
-      const data = JSON.parse(localStorage.getItem('japaData') || '[]');
-      const ctx = document.getElementById('statsChart').getContext('2d');
+      <div class="mantra-list" id="mantraList">
+        <!-- Mantras will be populated here by JavaScript -->
+      </div>
+    </div>
+  
+    <div id="counterTab" class="tab-content">
+      <div class="mantra-info" id="selectedMantraInfo">
+        <h2 id="currentMantra">Select a mantra to begin</h2>
+        <p id="mantraDescription"></p>
+      </div>
       
-      // Get current date
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      
-      // Prepare data based on period
-      let labels = [];
-      let counts = [];
-      let groupedData = {};
-      
-      switch(period) {
-        case 'daily':
-          // Last 7 days
-          for (let i = 6; i >= 0; i--) {
-            const date = new Date(now);
-            date.setDate(date.getDate() - i);
-            const dateStr = date.toLocaleDateString();
-            labels.push(dateStr);
-            groupedData[dateStr] = 0;
-          }
-          
-          data.forEach(entry => {
-            const entryDate = new Date(entry.date);
-            const dateStr = entryDate.toLocaleDateString();
-            if (groupedData.hasOwnProperty(dateStr)) {
-              groupedData[dateStr] = entry.count;
-            }
-          });
-          
-          counts = labels.map(label => groupedData[label]);
-          break;
-          
-        case 'weekly':
-          // Last 4 weeks
-          for (let i = 3; i >= 0; i--) {
-            const weekStart = new Date(now);
-            weekStart.setDate(weekStart.getDate() - (weekStart.getDay() + 7 * i));
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekEnd.getDate() + 6);
-            const weekLabel = `${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`;
-            labels.push(weekLabel);
-            groupedData[weekLabel] = 0;
-          }
-          
-          data.forEach(entry => {
-            const entryDate = new Date(entry.date);
-            for (let label of labels) {
-              const [start, end] = label.split(' - ').map(d => new Date(d));
-              if (entryDate >= start && entryDate <= end) {
-                groupedData[label] = Math.max(groupedData[label], entry.count);
-              }
-            }
-          });
-          
-          counts = labels.map(label => groupedData[label]);
-          break;
-          
-        case 'monthly':
-          // Last 6 months
-          for (let i = 5; i >= 0; i--) {
-            const date = new Date(now);
-            date.setMonth(date.getMonth() - i);
-            const monthLabel = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-            labels.push(monthLabel);
-            groupedData[monthLabel] = 0;
-          }
-          
-          data.forEach(entry => {
-            const entryDate = new Date(entry.date);
-            const monthLabel = entryDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-            if (groupedData.hasOwnProperty(monthLabel)) {
-              groupedData[monthLabel] = Math.max(groupedData[monthLabel], entry.count);
-            }
-          });
-          
-          counts = labels.map(label => groupedData[label]);
-          break;
-      }
-      
-      statsChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Japa Count',
-            data: counts,
-            backgroundColor: 'rgba(255, 112, 67, 0.5)',
-            borderColor: 'rgb(255, 112, 67)',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1
-              }
-            }
-          }
-        }
-      });
-    }
-    
-    function loadSavedCount() {
-      const savedState = localStorage.getItem('currentJapaState');
-      if (savedState) {
-        const state = JSON.parse(savedState);
-        currentCount = state.count || 0;
-        currentMantra = state.mantra || '';
-        currentCategory = state.category || '';
-        dailyGoal = state.goal || 108;
+      <div class="counter-section">
+        <div>
+          <label>Daily Goal:</label>
+          <input type="number" id="goal" min="1" value="108">
+          <button onclick="setGoal()">Set Goal</button>
+        </div>
         
-        // Restore mantra display if there was an active mantra
-        if (currentMantra && mantraData[currentMantra]) {
-          const mantra = mantraData[currentMantra];
-          document.getElementById('currentMantra').textContent = mantra.name;
-          document.getElementById('mantraDescription').innerHTML = `
-            <strong>Category:</strong> ${currentCategory}<br>
-            <strong>Deity:</strong> ${mantra.deity}<br>
-            <strong>Description:</strong> ${mantra.description}
-          `;
-          document.getElementById('goal').value = dailyGoal;
-        }
+        <div class="mala-circle" onclick="addOne()">
+          <div class="count">
+            <span id="counter">0</span>
+            <span id="goal-display"></span>
+          </div>
+        </div>
         
-        updateDisplay();
-      }
-    }
+        <div>
+          <button onclick="addCustom()">Add Custom</button>
+          <button onclick="resetCount()">Reset</button>
+        </div>
+      </div>
+    </div>
+  
+    <div id="statsTab" class="tab-content">
+      <div class="stats-section">
+        <h2>Statistics</h2>
+        <div class="tab-buttons">
+          <button onclick="showStats('daily')">Daily</button>
+          <button onclick="showStats('weekly')">Weekly</button>
+          <button onclick="showStats('monthly')">Monthly</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="statsChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="success-modal" id="successModal">
+    <div class="success-content">
+      <h2>🎉 Congratulations! 🎉</h2>
+      <p>You've completed your daily japa goal!</p>
+      <p>May this practice bring you peace and enlightenment.</p>
+      <button onclick="closeSuccessModal()">Continue</button>
+    </div>
+  </div>
+  
+  <script>
+  let currentUser = null;
+  
+  function onSignIn(googleUser) {
+    currentUser = googleUser;
+    const profile = googleUser.getBasicProfile();
     
-    function autoSaveState() {
-      if (!currentUser) return;
-      
-      const userId = currentUser.getBasicProfile().getId();
-      const userPrefix = `user_${userId}_`;
-      
-      const state = {
-        count: currentCount,
-        mantra: currentMantra,
-        category: currentCategory,
-        goal: dailyGoal
-      };
-      localStorage.setItem(userPrefix + 'currentJapaState', JSON.stringify(state));
-    }
+    // Display user info
+    document.getElementById('userImage').src = profile.getImageUrl();
+    document.getElementById('userName').textContent = profile.getName();
+    document.getElementById('userInfo').style.display = 'flex';
     
-    function showTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-      
-      document.getElementById(tabName + 'Tab').classList.add('active');
-      document.querySelector(`.nav-tab[onclick="showTab('${tabName}')"]`).classList.add('active');
-    }
+    // Hide login container
+    document.getElementById('loginContainer').style.display = 'none';
     
-    function selectMantra(mantraKey, category) {
-      currentMantra = mantraKey;
-      currentCategory = category;
-      
-      const mantra = mantraData[mantraKey];
-      document.getElementById('currentMantra').textContent = mantra.name;
-      document.getElementById('mantraDescription').innerHTML = `
-        <strong>Category:</strong> ${category}<br>
-        <strong>Deity:</strong> ${mantra.deity}<br>
-        <strong>Description:</strong> ${mantra.description}
-      `;
-      
-      showTab('counter');
-      resetCount();
-      autoSaveState(); // Add auto-save
-    }
+    // Load user's data
+    loadUserData(profile.getId());
     
-    // Initialize data storage if not exists
-    if (!localStorage.getItem('japaData')) {
-      localStorage.setItem('japaData', JSON.stringify([]));
-    }
+    // Show home tab
+    showTab('home');
     
-    function setGoal() {
-      dailyGoal = parseInt(document.getElementById('goal').value) || 108;
+    // Update any active content
+    updateDisplay();
+    showStats('daily');
+  }
+  
+  function signOut() {
+    const auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(() => {
+      // Hide user info
+      document.getElementById('userInfo').style.display = 'none';
+      
+      // Show login container
+      document.getElementById('loginContainer').style.display = 'flex';
+      
+      // Reset current user
+      currentUser = null;
+      
+      // Clear local data
+      resetUserData();
+      
+      // Reset to home tab
+      showTab('home');
+    });
+  }
+  
+  function loadUserData(userId) {
+    // Modify storage keys to be user-specific
+    const userPrefix = `user_${userId}_`;
+    
+    // Load japa state
+    const savedState = localStorage.getItem(userPrefix + 'currentJapaState');
+    if (savedState) {
+      const state = JSON.parse(savedState);
+      currentCount = state.count || 0;
+      currentMantra = state.mantra || '';
+      currentCategory = state.category || '';
+      dailyGoal = state.goal || 108;
       updateDisplay();
-      autoSaveState(); // Add auto-save
     }
     
-    function addOne() {
-      if (!currentMantra) {
-        alert('Please select a mantra first');
-        return;
+    // Load stats
+    const savedStats = localStorage.getItem(userPrefix + 'japaData');
+    if (savedStats) {
+      localStorage.setItem('japaData', savedStats);
+      showStats('daily');
+    }
+  }
+  
+  function resetUserData() {
+    // Clear all user-specific data
+    currentCount = 0;
+    currentMantra = '';
+    currentCategory = '';
+    dailyGoal = 108;
+    updateDisplay();
+    localStorage.setItem('japaData', '[]');
+    showStats('daily');
+  }
+  
+  // Modify autoSaveState and autoSaveToStats to be user-specific
+  function autoSaveState() {
+    if (!currentUser) return;
+    
+    const userId = currentUser.getBasicProfile().getId();
+    const userPrefix = `user_${userId}_`;
+    
+    const state = {
+      count: currentCount,
+      mantra: currentMantra,
+      category: currentCategory,
+      goal: dailyGoal
+    };
+    localStorage.setItem(userPrefix + 'currentJapaState', JSON.stringify(state));
+  }
+  
+  function autoSaveToStats() {
+    if (!currentUser || !currentMantra) return;
+    
+    const userId = currentUser.getBasicProfile().getId();
+    const userPrefix = `user_${userId}_`;
+    
+    const data = JSON.parse(localStorage.getItem('japaData') || '[]');
+    
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Normalize to start of day
+    
+    // Get today's total count
+    let todayTotal = currentCount;
+    
+    // Find if there are any previous entries for today
+    const todayEntries = data.filter(entry => {
+      const entryDate = new Date(entry.date);
+      entryDate.setHours(0, 0, 0, 0);
+      return entryDate.getTime() === now.getTime();
+    });
+    
+    // Remove today's entries
+    const filteredData = data.filter(entry => {
+      const entryDate = new Date(entry.date);
+      entryDate.setHours(0, 0, 0, 0);
+      return entryDate.getTime() !== now.getTime();
+    });
+    
+    // Add new entry with current count
+    filteredData.push({
+      date: now.toISOString(),
+      count: todayTotal,
+      mantra: currentMantra,
+      category: currentCategory,
+      timestamp: now.getTime()
+    });
+    
+    // Sort by date
+    filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    // Save with user prefix
+    localStorage.setItem(userPrefix + 'japaData', JSON.stringify(filteredData));
+    localStorage.setItem('japaData', JSON.stringify(filteredData)); // For current session
+  }
+  
+  // Remaining JavaScript functions...
+  let currentCount = 0;
+  let dailyGoal = 108;
+  let statsChart = null;
+  let currentMantra = '';
+  let currentCategory = '';
+  
+  const mantraData = {
+    'om_aim_hreem_kleem': {
+      name: 'Om Aim Hreem Kleem',
+      description: 'A powerful mantra for success and achievement. Associated with Goddess Saraswati, Lord Vishnu, and Goddess Lakshmi respectively. This combination brings knowledge, abundance, and attraction of positive outcomes.',
+      deity: 'Multiple Deities'
+    },
+    'om_gam_ganapataye_namaha': {
+      name: 'Om Gam Ganapataye Namaha',
+      description: 'The most fundamental Ganesh mantra for removing obstacles and ensuring success in new beginnings. Lord Ganesha is the remover of obstacles and patron of arts and sciences.',
+      deity: 'Lord Ganesha'
+    },
+    'om_shreem_mahalakshmiyei_namaha': {
+      name: 'Om Shreem Mahalakshmiyei Namaha',
+      description: 'A powerful mantra for invoking the blessings of Goddess Lakshmi. This mantra helps attract abundance, prosperity, and material well-being.',
+      deity: 'Goddess Lakshmi'
+    },
+    'om_namo_kubeeraya_namaha': {
+      name: 'Om Namo Kubeeraya Namaha',
+      description: 'A mantra dedicated to Lord Kuber, the divine treasurer. This mantra helps in attracting wealth and material success.',
+      deity: 'Lord Kuber'
+    },
+    'om_shanti_shanti_shanti': {
+      name: 'Om Shanti Shanti Shanti',
+      description: 'A universal peace mantra that brings harmony at the physical, mental, and spiritual levels. This mantra helps establish deep inner peace.',
+      deity: 'Universal'
+    },
+    'om_namah_shivaya': {
+      name: 'Om Namah Shivaya',
+      description: 'One of the most powerful and ancient Sanskrit mantras, dedicated to Lord Shiva. This mantra promotes transformation, peace, and spiritual growth.',
+      deity: 'Lord Shiva'
+    }
+  };
+  
+  // Additional mantras
+  const additionalMantras = {
+    'om_durgayei_namaha': {
+      name: 'Om Durgayei Namaha',
+      description: 'A powerful protective mantra dedicated to Goddess Durga. Provides protection from negative energies and enemies.',
+      deity: 'Goddess Durga',
+      sanskrit: 'ॐ दुर्गायै नमः',
+      category: 'Protection',
+      image: 'https://cdn.pixabay.com/photo/2017/10/17/18/27/goddess-durga-2861148_1280.jpg'
+    },
+    'om_arogya_vardhiniyei_namaha': {
+      name: 'Om Arogya Vardhiniyei Namaha',
+      description: 'A healing mantra for physical and mental well-being.',
+      deity: 'Dhanvantari',
+      sanskrit: 'ॐ आरोग्य वर्धिनीयै नमः',
+      category: 'Healing',
+      image: 'https://cdn.pixabay.com/photo/2016/11/28/21/20/healthcare-1866115_1280.jpg'
+    },
+    'om_vagishwariyei_namaha': {
+      name: 'Om Vagishwariyei Namaha',
+      description: 'For gaining knowledge, wisdom and mastery over speech.',
+      deity: 'Goddess Saraswati',
+      sanskrit: 'ॐ वागीश्वर्यै नमः',
+      category: 'Wisdom',
+      image: 'https://cdn.pixabay.com/photo/2017/08/25/10/57/goddess-saraswati-2679629_1280.jpg'
+    },
+    'om_kamadevaya_namaha': {
+      name: 'Om Kamadevaya Namaha',
+      description: 'For harmony in relationships and attracting love.',
+      deity: 'Kamadeva',
+      sanskrit: 'ॐ कामदेवाय नमः',
+      category: 'Love',
+      image: 'https://cdn.pixabay.com/photo/2018/05/09/12/30/love-3385680_1280.jpg'
+    }
+  };
+  
+  // Merge with existing mantraData
+  Object.assign(mantraData, additionalMantras);
+  
+  // Add function to filter mantras by category
+  function filterMantrasByCategory(category) {
+    const mantras = Object.entries(mantraData)
+      .filter(([key, data]) => data.category === category)
+      .map(([key, data]) => ({key, ...data}));
+      
+    let html = '';
+    for (const mantra of mantras) {
+      html += `
+        <div class="mantra-card" onclick="selectMantra('${mantra.key}', '${mantra.category}')">
+          <img src="${mantra.image}" 
+               alt="Image of ${mantra.deity}" 
+               class="deity-image"
+               width="80" height="80">
+          <div class="mantra-text">
+            <h3>${mantra.name}</h3>
+            <div class="sanskrit-text">${mantra.sanskrit}</div>
+            <p>${mantra.description}</p>
+          </div>
+        </div>
+      `;
+    }
+    
+    document.getElementById('mantraList').innerHTML = html;
+  }
+  
+  function showStats(period) {
+    if (statsChart) {
+      statsChart.destroy();
+    }
+  
+    const data = JSON.parse(localStorage.getItem('japaData') || '[]');
+    const ctx = document.getElementById('statsChart').getContext('2d');
+    
+    // Get current date
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    
+    // Prepare data based on period
+    let labels = [];
+    let counts = [];
+    let groupedData = {};
+    
+    switch(period) {
+      case 'daily':
+        // Last 7 days
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - i);
+          const dateStr = date.toLocaleDateString();
+          labels.push(dateStr);
+          groupedData[dateStr] = 0;
+        }
+        
+        data.forEach(entry => {
+          const entryDate = new Date(entry.date);
+          const dateStr = entryDate.toLocaleDateString();
+          if (groupedData.hasOwnProperty(dateStr)) {
+            groupedData[dateStr] = entry.count;
+          }
+        });
+        
+        counts = labels.map(label => groupedData[label]);
+        break;
+        
+      case 'weekly':
+        // Last 4 weeks
+        for (let i = 3; i >= 0; i--) {
+          const weekStart = new Date(now);
+          weekStart.setDate(weekStart.getDate() - (weekStart.getDay() + 7 * i));
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+          const weekLabel = `${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`;
+          labels.push(weekLabel);
+          groupedData[weekLabel] = 0;
+        }
+        
+        data.forEach(entry => {
+          const entryDate = new Date(entry.date);
+          for (let label of labels) {
+            const [start, end] = label.split(' - ').map(d => new Date(d));
+            if (entryDate >= start && entryDate <= end) {
+              groupedData[label] = Math.max(groupedData[label], entry.count);
+            }
+          }
+        });
+        
+        counts = labels.map(label => groupedData[label]);
+        break;
+        
+      case 'monthly':
+        // Last 6 months
+        for (let i = 5; i >= 0; i--) {
+          const date = new Date(now);
+          date.setMonth(date.getMonth() - i);
+          const monthLabel = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+          labels.push(monthLabel);
+          groupedData[monthLabel] = 0;
+        }
+        
+        data.forEach(entry => {
+          const entryDate = new Date(entry.date);
+          const monthLabel = entryDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+          if (groupedData.hasOwnProperty(monthLabel)) {
+            groupedData[monthLabel] = Math.max(groupedData[monthLabel], entry.count);
+          }
+        });
+        
+        counts = labels.map(label => groupedData[label]);
+        break;
+    }
+    
+    statsChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Japa Count',
+          data: counts,
+          backgroundColor: 'rgba(255, 112, 67, 0.5)',
+          borderColor: 'rgb(255, 112, 67)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1
+            }
+          }
+        }
       }
-      currentCount++;
+    });
+  }
+  
+  function loadSavedCount() {
+    const savedState = localStorage.getItem('currentJapaState');
+    if (savedState) {
+      const state = JSON.parse(savedState);
+      currentCount = state.count || 0;
+      currentMantra = state.mantra || '';
+      currentCategory = state.category || '';
+      dailyGoal = state.goal || 108;
+      
+      // Restore mantra display if there was an active mantra
+      if (currentMantra && mantraData[currentMantra]) {
+        const mantra = mantraData[currentMantra];
+        document.getElementById('currentMantra').textContent = mantra.name;
+        document.getElementById('mantraDescription').innerHTML = `
+          <strong>Category:</strong> ${currentCategory}<br>
+          <strong>Deity:</strong> ${mantra.deity}<br>
+          <strong>Description:</strong> ${mantra.description}
+        `;
+        document.getElementById('goal').value = dailyGoal;
+      }
+      
+      updateDisplay();
+    }
+  }
+  
+  function autoSaveState() {
+    if (!currentUser) return;
+    
+    const userId = currentUser.getBasicProfile().getId();
+    const userPrefix = `user_${userId}_`;
+    
+    const state = {
+      count: currentCount,
+      mantra: currentMantra,
+      category: currentCategory,
+      goal: dailyGoal
+    };
+    localStorage.setItem(userPrefix + 'currentJapaState', JSON.stringify(state));
+  }
+  
+  function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+    
+    document.getElementById(tabName + 'Tab').classList.add('active');
+    document.querySelector(`.nav-tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+  }
+  
+  function selectMantra(mantraKey, category) {
+    currentMantra = mantraKey;
+    currentCategory = category;
+    
+    const mantra = mantraData[mantraKey];
+    document.getElementById('currentMantra').textContent = mantra.name;
+    document.getElementById('mantraDescription').innerHTML = `
+      <strong>Category:</strong> ${category}<br>
+      <strong>Deity:</strong> ${mantra.deity}<br>
+      <strong>Description:</strong> ${mantra.description}
+    `;
+    
+    showTab('counter');
+    resetCount();
+    autoSaveState(); // Add auto-save
+  }
+  
+  // Initialize data storage if not exists
+  if (!localStorage.getItem('japaData')) {
+    localStorage.setItem('japaData', JSON.stringify([]));
+  }
+  
+  function setGoal() {
+    dailyGoal = parseInt(document.getElementById('goal').value) || 108;
+    updateDisplay();
+    autoSaveState(); // Add auto-save
+  }
+  
+  function addOne() {
+    if (!currentMantra) {
+      alert('Please select a mantra first');
+      return;
+    }
+    currentCount++;
+    updateDisplay();
+    checkGoalCompletion();
+    autoSaveState();
+    autoSaveToStats(); // Save stats on each count
+  }
+  
+  function addCustom() {
+    if (!currentMantra) {
+      alert('Please select a mantra first');
+      return;
+    }
+    const count = parseInt(prompt("Enter number of rounds:")) || 0;
+    if (count > 0) {
+      currentCount += count;
       updateDisplay();
       checkGoalCompletion();
       autoSaveState();
-      autoSaveToStats(); // Save stats on each count
+      autoSaveToStats(); // Save stats on custom count
     }
+  }
+  
+  function autoSaveToStats() {
+    if (!currentUser || !currentMantra) return;
     
-    function addCustom() {
-      if (!currentMantra) {
-        alert('Please select a mantra first');
-        return;
-      }
-      const count = parseInt(prompt("Enter number of rounds:")) || 0;
-      if (count > 0) {
-        currentCount += count;
-        updateDisplay();
-        checkGoalCompletion();
-        autoSaveState();
-        autoSaveToStats(); // Save stats on custom count
-      }
+    const userId = currentUser.getBasicProfile().getId();
+    const userPrefix = `user_${userId}_`;
+    
+    const data = JSON.parse(localStorage.getItem('japaData') || '[]');
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Normalize to start of day
+    
+    // Get today's total count
+    let todayTotal = currentCount;
+    
+    // Find if there are any previous entries for today
+    const todayEntries = data.filter(entry => {
+      const entryDate = new Date(entry.date);
+      entryDate.setHours(0, 0, 0, 0);
+      return entryDate.getTime() === now.getTime();
+    });
+    
+    // Remove today's entries
+    const filteredData = data.filter(entry => {
+      const entryDate = new Date(entry.date);
+      entryDate.setHours(0, 0, 0, 0);
+      return entryDate.getTime() !== now.getTime();
+    });
+    
+    // Add new entry with current count
+    filteredData.push({
+      date: now.toISOString(),
+      count: todayTotal,
+      mantra: currentMantra,
+      category: currentCategory,
+      timestamp: now.getTime()
+    });
+    
+    // Sort by date
+    filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    // Save with user prefix
+    localStorage.setItem(userPrefix + 'japaData', JSON.stringify(filteredData));
+    localStorage.setItem('japaData', JSON.stringify(filteredData)); // For current session
+  }
+  
+  function checkGoalCompletion() {
+    if (currentCount >= dailyGoal) {
+      document.getElementById('successModal').style.display = 'flex';
     }
-    
-    function autoSaveToStats() {
-      if (!currentUser || !currentMantra) return;
-      
-      const userId = currentUser.getBasicProfile().getId();
-      const userPrefix = `user_${userId}_`;
-      
-      const data = JSON.parse(localStorage.getItem('japaData') || '[]');
-      const now = new Date();
-      now.setHours(0, 0, 0, 0); // Normalize to start of day
-      
-      // Get today's total count
-      let todayTotal = currentCount;
-      
-      // Find if there are any previous entries for today
-      const todayEntries = data.filter(entry => {
-        const entryDate = new Date(entry.date);
-        entryDate.setHours(0, 0, 0, 0);
-        return entryDate.getTime() === now.getTime();
-      });
-      
-      // Remove today's entries
-      const filteredData = data.filter(entry => {
-        const entryDate = new Date(entry.date);
-        entryDate.setHours(0, 0, 0, 0);
-        return entryDate.getTime() !== now.getTime();
-      });
-      
-      // Add new entry with current count
-      filteredData.push({
-        date: now.toISOString(),
-        count: todayTotal,
-        mantra: currentMantra,
-        category: currentCategory,
-        timestamp: now.getTime()
-      });
-      
-      // Sort by date
-      filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
-      
-      // Save with user prefix
-      localStorage.setItem(userPrefix + 'japaData', JSON.stringify(filteredData));
-      localStorage.setItem('japaData', JSON.stringify(filteredData)); // For current session
-    }
-    
-    function checkGoalCompletion() {
-      if (currentCount >= dailyGoal) {
-        document.getElementById('successModal').style.display = 'flex';
-      }
-    }
-    
-    function closeSuccessModal() {
-      document.getElementById('successModal').style.display = 'none';
-    }
-    
-    function updateDisplay() {
-      document.getElementById('counter').textContent = currentCount;
-      document.getElementById('goal-display').textContent = ` / ${dailyGoal}`;
-    }
-    
-    function resetCount() {
-      // Save current count to stats before resetting
-      autoSaveToStats();
-      currentCount = 0;
-      updateDisplay();
-      autoSaveState();
-    }
-    
-    // Update loadSavedCount to ensure stats are properly loaded
-    function loadSavedCount() {
-      const savedState = localStorage.getItem('currentJapaState');
-      if (savedState) {
-        const state = JSON.parse(savedState);
-        currentCount = state.count || 0;
-        currentMantra = state.mantra || '';
-        currentCategory = state.category || '';
-        dailyGoal = state.goal || 108;
-        
-        // Restore mantra display if there was an active mantra
-        if (currentMantra && mantraData[currentMantra]) {
-          const mantra = mantraData[currentMantra];
-          document.getElementById('currentMantra').textContent = mantra.name;
-          document.getElementById('mantraDescription').innerHTML = `
-            <strong>Category:</strong> ${currentCategory}<br>
-            <strong>Deity:</strong> ${mantra.deity}<br>
-            <strong>Description:</strong> ${mantra.description}
-          `;
-          document.getElementById('goal').value = dailyGoal;
-        }
-        
-        updateDisplay();
-      }
-    }
-    
-    // Initialize display
-    loadSavedCount(); // Load saved state when page loads
+  }
+  
+  function closeSuccessModal() {
+    document.getElementById('successModal').style.display = 'none';
+  }
+  
+  function updateDisplay() {
+    document.getElementById('counter').textContent = currentCount;
+    document.getElementById('goal-display').textContent = ` / ${dailyGoal}`;
+  }
+  
+  function resetCount() {
+    // Save current count to stats before resetting
+    autoSaveToStats();
+    currentCount = 0;
     updateDisplay();
-    showStats('daily');
-    </script>
-    </body></html>
+    autoSaveState();
+  }
+  
+  // Update loadSavedCount to ensure stats are properly loaded
+  function loadSavedCount() {
+    const savedState = localStorage.getItem('currentJapaState');
+    if (savedState) {
+      const state = JSON.parse(savedState);
+      currentCount = state.count || 0;
+      currentMantra = state.mantra || '';
+      currentCategory = state.category || '';
+      dailyGoal = state.goal || 108;
+      
+      // Restore mantra display if there was an active mantra
+      if (currentMantra && mantraData[currentMantra]) {
+        const mantra = mantraData[currentMantra];
+        document.getElementById('currentMantra').textContent = mantra.name;
+        document.getElementById('mantraDescription').innerHTML = `
+          <strong>Category:</strong> ${currentCategory}<br>
+          <strong>Deity:</strong> ${mantra.deity}<br>
+          <strong>Description:</strong> ${mantra.description}
+        `;
+        document.getElementById('goal').value = dailyGoal;
+      }
+      
+      updateDisplay();
+    }
+  }
+  
+  // Initialize display
+  loadSavedCount(); // Load saved state when page loads
+  updateDisplay();
+  showStats('daily');
+  </script>
+  </body></html>
